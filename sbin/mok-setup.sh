@@ -74,6 +74,7 @@ Required for the first run (default: Y): " _response
         [Nn])
         read -rp "Provide path to existing MOK certificates (default: /var/lib/shim-signed/mok/): "
         MOK_CERT_DIR=${MOK_CERT_DIR:-"/var/lib/shim-signed/mok/"}
+        mkdir -p $MOK_CERT_DIR
         read -rp "Provide the MOK certificate name (default: MOK-Kernel): "
         MOK_CERT_NAME=${MOK_CERT_NAME:-"MOK-Kernel"}
         ;;
