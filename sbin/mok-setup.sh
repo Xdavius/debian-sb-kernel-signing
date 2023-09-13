@@ -18,7 +18,7 @@ else
 fi
 
 SCRIPT_DIR="$( cd "$( dirname "$(readlink -f "${BASH_SOURCE[0]}")" )" &> /dev/null && pwd )"
-REQURIED_PACKAGES=("mokutil" "openssl" "sbsigntool" "grub-efi-amd64-signed" "fwts")
+REQURIED_PACKAGES=("mokutil" "openssl" "sbsigntool" "grub-efi-amd64-signed") #deleted fwts package from ubuntu - not used
 
 for dpkg in "${REQURIED_PACKAGES[@]}"; do
     echo -n "Checking if ${dpkg} is installed..";
