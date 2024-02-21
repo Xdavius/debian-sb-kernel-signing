@@ -1,0 +1,24 @@
+# This definition stops the following lines failing if HOME isn't
+# defined.
+HOME                    = .
+RANDFILE                = $ENV::HOME/.rnd
+[ req ]
+distinguished_name      = req_distinguished_name
+x509_extensions         = v3
+string_mask             = utf8only
+prompt                  = no
+
+[ req_distinguished_name ]
+countryName             = FR
+stateOrProvinceName     = France
+localityName            = Vortex City
+0.organizationName      = Vortex Project
+commonName              = Secure Boot Signing Key
+emailAddress            = xdavius@github.com
+
+[ v3 ]
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid:always,issuer
+basicConstraints        = critical,CA:FALSE
+extendedKeyUsage        = codeSigning,1.3.6.1.4.1.311.10.3.6
+nsComment               = "OpenSSL Generated Certificate"
