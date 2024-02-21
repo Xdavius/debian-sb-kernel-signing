@@ -1,5 +1,6 @@
 #!/usr/bin/bash
 
+sb_install() {
 sudo mkdir -p /var/lib/shim-signed/mok/
 
 sudo openssl req -config ./mokconfig.cnf \
@@ -10,9 +11,63 @@ sudo openssl req -config ./mokconfig.cnf \
 
 sudo openssl x509 -in /var/lib/shim-signed/mok/MOK.der -inform DER -outform PEM -out /var/lib/shim-signed/mok/MOK.pem
 
-sudo mokutil --import /var/lib/shim-signed/mok/MOK.der
+}
 
+kernel_sign() {
+
+if [[ ! -f /usr/bin/sbsign ]]; then
+    sudo apt install -y sbsigntool
+fi
+sudo install -Dm755 "zz-signing" "/etc/kernel/postinst.d/zz-signing"
+sudo chown root:root /etc/kernel/postinst.d/zz-signing
+sudo chmod u+rx /etc/kernel/postinst.d/zz-signing
+
+}
+
+import_mok() {
+
+sudo mokutil --import /var/lib/shim-signed/mok/MOK.der
+}
+
+show_mok() {
 sudo mokutil --list-enrolled
+}
+
+help() {
+
+echo "
+USAGE : sbsetup [OPTION]
+
+    install    : Install mok files and autosign kernel script, and setup import of MOK
+    show       : Show installed MOK files
+    uninstall  : Uninstall mok files and autosign kernel script
+
+    help       : Show this message
+"
+
+
+}
+
+
+case $1 in
+install)
+    sb_install
+    kernel_sign
+    import_mok
+;;
+show)
+    show_mok
+;;
+uninstall)
+
+;;
+help)
+    help
+;;
+*)
+    help
+;;
+esac
 
 # Sign Kernel if needed
 
