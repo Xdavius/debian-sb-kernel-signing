@@ -4,7 +4,7 @@
 set -e
 
 KERNEL_IMAGE=$2
-MOK_CERT_NAME="MOK"
+MOK_CERT_NAME="MOK-Kernel"
 MOK_DIRECTORY="/var/lib/shim-signed/mok"
 
 if [ $# -ne 2 ] ; then
@@ -45,17 +45,21 @@ fi
 echo "Signing $KERNEL_IMAGE..."
 sbsign --key "$MOK_DIRECTORY/$MOK_CERT_NAME.priv" --cert "$MOK_DIRECTORY/$MOK_CERT_NAME.pem" --output "$KERNEL_IMAGE" "$KERNEL_IMAGE"
 
+# Sign modules for 3rd party kernels
 kernel_mod_name=$(echo $KERNEL_IMAGE | cut -c 15-)
 signfile_path="$(find /usr/lib/linux-kbuild* -name sign-file)"
-echo "Signing modules /usr/lib/modules/$kernel_mod_name/"
-echo "Signing Updates"
-find /usr/lib/modules/$kernel_mod_name/updates/ -name \*.ko | while read i; \
-do sudo --preserve-env=KBUILD_SIGN_PIN \
-$signfile_path sha256 /var/lib/shim-signed/mok/MOK.priv /var/lib/shim-signed/mok/MOK.der "$i"\
-|| break; done
+echo "Signing 3rd party modules /usr/lib/modules/$kernel_mod_name/"
 
-echo "Signing Dkms"
-find /usr/lib/modules/$kernel_mod_name/misc/ -name \*.ko | while read i; \
-do sudo --preserve-env=KBUILD_SIGN_PIN \
-$signfile_path sha256 /var/lib/shim-signed/mok/MOK.priv /var/lib/shim-signed/mok/MOK.der "$i"\
-|| break; done
+if [[ -d /usr/lib/modules/$kernel_mod_name/updates ]]; then
+    echo "Signing Updates"
+    find /usr/lib/modules/$kernel_mod_name/updates/ -name \*.ko | while read i; \
+    do $signfile_path sha256 /var/lib/shim-signed/mok/MOK.priv /var/lib/shim-signed/mok/MOK.der "$i"\
+    || break; done
+fi
+
+if [[ -d /usr/lib/modules/$kernel_mod_name/misc ]]; then
+    echo "Signing Dkms"
+    find /usr/lib/modules/$kernel_mod_name/misc/ -name \*.ko | while read i; \
+    do $signfile_path sha256 /var/lib/shim-signed/mok/MOK.priv /var/lib/shim-signed/mok/MOK.der "$i"\
+    || break; done
+fi
